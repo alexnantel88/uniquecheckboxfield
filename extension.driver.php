@@ -7,11 +7,11 @@ class Extension_UniqueCheckboxField extends Extension
     {
         return Symphony::Database()->query("
             CREATE TABLE IF NOT EXISTS `tbl_fields_uniquecheckbox` (
-                `id` int(11) unsigned NOT NULL auto_increment,
-                `field_id` int(11) unsigned NOT NULL,
-                `default_state` enum('on', 'off') NOT NULL DEFAULT 'on',
-                `unique_entries` int(11) unsigned NOT NULL DEFAULT 1,
-                `unique_steal` enum('on', 'off') NOT NULL DEFAULT 'on',
+                `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+                `field_id` INT(11) UNSIGNED NOT NULL,
+                `default_state` ENUM('on', 'off') NOT NULL DEFAULT 'on',
+                `unique_entries` INT(11) UNSIGNED NOT NULL DEFAULT 1,
+                `unique_steal` ENUM('on', 'off') NOT NULL DEFAULT 'on',
                 PRIMARY KEY (`id`),
                 KEY `field_id` (`field_id`)
             ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

@@ -22,10 +22,10 @@ class FieldUniqueCheckbox extends FieldCheckbox
 
         return Symphony::Database()->query("
             CREATE TABLE IF NOT EXISTS `tbl_entries_data_{$field_id}` (
-                `id` int(11) unsigned NOT NULL auto_increment,
-                `entry_id` int(11) unsigned NOT NULL,
-                `value` varchar(255) default NULL,
-                `order` int(11) unsigned NOT NULL DEFAULT 0,
+                `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+                `entry_id` INT(11) UNSIGNED NOT NULL,
+                `value` VARCHAR(255) DEFAULT NULL,
+                `order` INT(11) UNSIGNED NOT NULL DEFAULT 0,
                 PRIMARY KEY  (`id`),
                 KEY `entry_id` (`entry_id`),
                 KEY `value` (`value`),
