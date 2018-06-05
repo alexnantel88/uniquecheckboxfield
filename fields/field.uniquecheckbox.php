@@ -18,20 +18,32 @@ class FieldUniqueCheckbox extends FieldCheckbox
 
     public function createTable()
     {
-        $field_id = $this->get('id');
-
-        return Symphony::Database()->query("
-            CREATE TABLE IF NOT EXISTS `tbl_entries_data_{$field_id}` (
-                `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
-                `entry_id` INT(11) UNSIGNED NOT NULL,
-                `value` VARCHAR(255) DEFAULT NULL,
-                `order` INT(11) UNSIGNED NOT NULL DEFAULT 0,
-                PRIMARY KEY  (`id`),
-                KEY `entry_id` (`entry_id`),
-                KEY `value` (`value`),
-                KEY `order` (`order`)
-            )
-        ");
+        return Symphony::Database()
+            ->create('tbl_entries_data_' . $this->get('id'))
+            ->ifNotExists()
+            ->fields([
+                'id' => [
+                    'type' => 'int(11)',
+                    'auto' => true,
+                ],
+                'entry_id' => 'int(11)',
+                'value' => [
+                    'type' => 'varchar(255)',
+                    'null' => true,
+                ],
+                'order' => [
+                    'type' => 'int(11)',
+                    'default' => 0,
+                ],
+            ])
+            ->keys([
+                'id' => 'primary',
+                'entry_id' => 'key',
+                'value' => 'key',
+                'order' => 'key',
+            ])
+            ->execute()
+            ->success();
     }
 
     /*-------------------------------------------------------------------------
@@ -147,30 +159,25 @@ class FieldUniqueCheckbox extends FieldCheckbox
 
         if ($data == 'yes') {
             $allowed = (integer)$this->get('unique_entries');
-            $taken = (integer)Symphony::Database()->fetchVar('taken', 0, "
-                SELECT
-                    COUNT(f.id) AS `taken`
-                FROM
-                    `tbl_entries_data_{$field_id}` AS f
-                WHERE
-                    f.value = 'yes'
-                    AND f.entry_id != {$entry_id}
-            ");
+            $taken = (integer)Symphony::database()
+                ->select(['COUNT(f.id)' => 'taken'])
+                ->from('tbl_entries_data_' . $field_id, 'f')
+                ->where(['f.value' => 'yes'])
+                ->where(['f.entry_id' => ['!=' => $entry_id]])
+                ->execute()
+                ->variable('taken');
 
             // Steal from another entry:
             if ($taken >= $allowed and $this->get('unique_steal') == 'on') {
-                Symphony::Database()->query("
-                    UPDATE
-                        `tbl_entries_data_{$field_id}`
-                    SET
-                        `value` = 'no'
-                    WHERE
-                        `value` = 'yes'
-                        AND `entry_id` != {$entry_id}
-                    ORDER BY
-                        `order` ASC
-                    LIMIT 1
-                ");
+                Symphony::Database()
+                    ->update('tbl_entries_data_' . $field_id)
+                    ->set([
+                        'value' => 'no',
+                    ])
+                    ->where(['value' => 'yes'])
+                    ->where(['entry_id' => ['!=' => $entry_id]])
+                    ->execute()
+                    ->success();
 
                 $taken--;
             }
